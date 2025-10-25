@@ -11,7 +11,7 @@ const followUser = async (req, res) => {
 
   try {
     await followModel.followUser(followerId, followingId);
-    res.status(200).json({ message: "User followed successfully" });
+    res.json({ isFollowing: true, message: "User followed successfully" });
   } catch (error) {
     console.error("Follow Error:", error.message);
     res.status(500).json({ message: "Server error while following user" });
@@ -25,7 +25,7 @@ const unfollowUser = async (req, res) => {
 
   try {
     await followModel.unfollowUser(followerId, followingId);
-    res.status(200).json({ message: "User unfollowed successfully" });
+    res.json({ isFollowing: false, message: "User unfollowed successfully" });
   } catch (error) {
     console.error("Unfollow Error:", error.message);
     res.status(500).json({ message: "Server error while unfollowing user" });

@@ -56,13 +56,27 @@ const signin = async (req,res) =>{
     if(!user){
         return res.status(400).json({message: "Invalid Credentials"})
     }
-    const isMatch = bcrypt.compare(password,user.password)
-    if (!isMatch) return res.status(400).json({ message: "Invalid credentials" });
+    const isMatch =await bcrypt.compare(password,user.password)
+    if (!isMatch){
+        return res.status(400).json({ message: "Invalid credentials" });
+    }
 
     const token = generateToken(user.id)
-    console.log("signed in successfully....")
+    console.log("🟢 Email:", email);
+    console.log("🟢 Password:", password);
+    console.log("🟢 User found:", user);
+    console.log("🟢 Signed in successfully...");
 
-    res.status(200).json({ token });
+    return res.status(200).json({
+        message: "Signed in successfully",
+        token,
+        user: {
+          id: user.id,
+          name: user.name,
+          email: user.email,
+          // any other fields you want to expose
+        },
+      });
     }catch (err) {
     console.error("Signin error:", err);
     res.status(500).json({ message: "Server error" });

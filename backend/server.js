@@ -1,17 +1,23 @@
 const express = require("express");
 const http = require("http");
+const cors = require("cors")
 const { Server } = require("socket.io");
 const homeRoutes =require("./routes/home")
 const postRoutes =  require("./routes/postRoutes")
 const followRoutes = require("./routes/followRoutes")
 const chatRoutes = require("./routes/chatRoutes");
+const path = require("path")
 const app = express();
 app.use(express.json())
+app.use(cors({
+  origin: "http://localhost:5173", // frontend origin
+  credentials: true // allow cookies/auth headers
+}));
 
 app.use("/api/v1",homeRoutes)
 app.use("/api/v1/post", postRoutes)
 app.use("/api/v1/follow",followRoutes)
-app.use("/api/v1/uploads", express.static("uploads"));
+app.use("/api/v1/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/v1/chat", chatRoutes);
 
 // Create HTTP server and attach Socket.IO
