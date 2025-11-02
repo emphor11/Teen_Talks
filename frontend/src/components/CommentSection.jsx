@@ -1,4 +1,3 @@
-// src/components/CommentSection.jsx
 import React, { useState, useEffect, useContext } from "react";
 import { AuthContext } from "../context/AuthContext";
 
@@ -11,10 +10,10 @@ const CommentSection = ({ postId }) => {
   // Fetch comments for this post
   const fetchComments = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/post/comments/${postId}`);
+      const res = await fetch(`http://localhost:3000/api/v1/posts/comments/${postId}`);
       const data = await res.json();
-      console.log(data)
-      setComments(data.content || []);
+      console.log("Fetched comments:", data);
+      setComments(data || []); // ✅ Corrected
     } catch (err) {
       console.error("Error fetching comments:", err);
     }
@@ -29,7 +28,7 @@ const CommentSection = ({ postId }) => {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:3000/api/v1/post/comments/${postId}`, {
+      const res = await fetch(`http://localhost:3000/api/v1/posts/comments/${postId}`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
@@ -39,9 +38,9 @@ const CommentSection = ({ postId }) => {
       });
 
       const data = await res.json();
-      console.log("data",data)
+      console.log("Added comment:", data);
       if (res.ok) {
-        setComments([data.content, ...comments]);
+        setComments([data, ...comments]); // ✅ Corrected
         setNewComment("");
       } else {
         alert(data.message || "Failed to add comment");
@@ -59,27 +58,40 @@ const CommentSection = ({ postId }) => {
   }, [postId]);
 
   return (
-    <div className="comment-section">
-      <form onSubmit={handleSubmit}>
+    <div className="mt-4">
+      {/* Comment input */}
+      <form className="flex gap-2" onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Write a comment..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
+          className="flex-1 p-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 text-gray-700 font-[Poppins] transition"
         />
-        <button type="submit" disabled={loading}>
+        <button
+          type="submit"
+          disabled={loading}
+          className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-2xl shadow-md hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+        >
           {loading ? "Posting..." : "Comment"}
         </button>
       </form>
 
-      <div className="comments-list">
+      {/* Comments list */}
+      <div className="mt-3 flex flex-col gap-3">
         {comments.length === 0 ? (
-          <p>No comments yet.</p>
+          <p className="text-gray-500 text-sm font-[Poppins]">No comments yet.</p>
         ) : (
           comments.map((c) => (
-            <div key={c.id || `${c.user_id}-${c.created_at}`}  className="comment-item">
-                
-             {c}
+            <div
+              key={c.id}
+              className="bg-gradient-to-r from-pink-50 to-purple-50 p-3 rounded-2xl shadow-inner border border-gray-200 text-gray-700 font-[Poppins]"
+            >
+              <p className="font-semibold text-sm text-pink-600">{c.user_name}</p>
+              <p>{c.content}</p>
+              <p className="text-xs text-gray-400">
+                {new Date(c.created_at).toLocaleString()}
+              </p>
             </div>
           ))
         )}

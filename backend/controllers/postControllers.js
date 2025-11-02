@@ -1,4 +1,4 @@
-const { createPost, getAllPosts, getPostById } = require("../models/Post");
+const { createPost, getAllPosts, getPostById, getPostsByUserId, } = require("../models/Post");
 const path = require("path");
 
 const addPost = async (req, res) => {
@@ -29,6 +29,7 @@ const addPost = async (req, res) => {
 const getPost = async(req,res)=>{
     try{
         const result = await getAllPosts()
+        console.log("res1",result)
         res.json(result)
     }catch(err){
         console.log("Error is", err)
@@ -46,5 +47,15 @@ const fetchPostById = async (req, res) => {
       res.status(500).json({ message: "Server error" });
     }
   };
+
+const getMyPost = async (req,res) =>{
+  try{
+    const post = await getPostsByUserId(req.userId)
+    if (!posts) return res.status(404).json({ message: "Post not found" });
+    res.json(posts)
+  }catch(err){
+    res.status(500).json({ message: "Server error" });
+  }
+}
   
-module.exports = { addPost, getPost, fetchPostById };
+module.exports = { addPost, getPost, fetchPostById ,getMyPost};

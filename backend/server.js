@@ -3,6 +3,7 @@ const http = require("http");
 const cors = require("cors")
 const { Server } = require("socket.io");
 const homeRoutes =require("./routes/home")
+const userRoutes = require("./routes/userRoutes")
 const postRoutes =  require("./routes/postRoutes")
 const followRoutes = require("./routes/followRoutes")
 const chatRoutes = require("./routes/chatRoutes");
@@ -15,7 +16,8 @@ app.use(cors({
 }));
 
 app.use("/api/v1",homeRoutes)
-app.use("/api/v1/post", postRoutes)
+app.use("/api/v1/users",userRoutes)
+app.use("/api/v1/posts", postRoutes)
 app.use("/api/v1/follow",followRoutes)
 app.use("/api/v1/uploads", express.static(path.join(__dirname, "uploads")));
 app.use("/api/v1/chat", chatRoutes);

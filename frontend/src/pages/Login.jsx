@@ -16,7 +16,6 @@ export default function Login() {
     setLoading(true);
 
     try {
-      // call API via AuthContext.api or directly using API import
       const res = await fetch("http://localhost:3000/api/v1/signin", {
         method: "POST",
         headers: { "Content-Type": "application/json" },
@@ -38,54 +37,71 @@ export default function Login() {
         return;
       }
 
-      login(data.user, data.token);
+      login(data.user, data.token,data.posts);
 
-try {
-  // Fetch logged-in user profile using token
-  const profileRes = await fetch("http://localhost:3000/api/v1/profile", {
-    headers: { Authorization: `Bearer ${data.token}` },
-  });
-  const profileData = await profileRes.json();
+      try {
+        const profileRes = await fetch("http://localhost:3000/api/v1/profile", {
+          headers: { Authorization: `Bearer ${data.token}` },
+        });
+        const profileData = await profileRes.json();
 
-  if (profileRes.ok && profileData.user) {
-    console.log("Profile fetched successfully:", profileData.user);
-    navigate(`/profile/${profileData.user.id}`); // ✅ redirect to own profile page
-  } else {
-    console.error("Error fetching profile:", profileData);
-    navigate("/"); // fallback
-  }
-} catch (err) {
-  console.error("Profile fetch error:", err);
-  navigate("/");
-}
-
+        if (profileRes.ok && profileData.user) {
+          console.log("Profile fetched successfully:", profileData.user);
+          navigate(`/profile/${profileData.user.id}`);
+        } else {
+          console.error("Error fetching profile:", profileData);
+          navigate("/");
+        }
+      } catch (err) {
+        console.error("Profile fetch error:", err);
+        navigate("/");
+      }
     } finally {
       setLoading(false);
     }
   };
 
   return (
-    <form onSubmit={handleSubmit} className="flex flex-col gap-3 max-w-sm mx-auto mt-10">
-      <input
-        type="email"
-        placeholder="Email"
-        value={email}
-        onChange={(e) => setEmail(e.target.value)}
-        className="border p-2 rounded"
-      />
-      <input
-        type="password"
-        placeholder="Password"
-        value={password}
-        onChange={(e) => setPassword(e.target.value)}
-        className="border p-2 rounded"
-      />
-      <button
-        type="submit"
-        className="bg-blue-500 hover:bg-blue-600 text-white font-semibold rounded p-2"
-      >
-        Login
-      </button>
-    </form>
+    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-pink-100 via-purple-100 to-blue-100">
+      <div className="w-full max-w-sm bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
+        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6 font-[Poppins]">
+          Welcome Back 👋
+        </h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <input
+            type="email"
+            placeholder="Email address"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            className="border border-gray-300 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 p-3 rounded-xl outline-none transition-all duration-300"
+          />
+          <input
+            type="password"
+            placeholder="Password"
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            className="border border-gray-300 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 p-3 rounded-xl outline-none transition-all duration-300"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className={`${
+              loading ? "opacity-70" : "hover:opacity-90"
+            } bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-xl p-3 transition-all duration-300 shadow-md`}
+          >
+            {loading ? "Logging in..." : "Login"}
+          </button>
+        </form>
+        <p className="text-center text-gray-500 mt-6 text-sm">
+          Don’t have an account?{" "}
+          <span
+            onClick={() => navigate("/signup")}
+            className="text-pink-500 font-semibold hover:underline cursor-pointer"
+          >
+            Sign up
+          </span>
+        </p>
+      </div>
+    </div>
   );
-};
+}

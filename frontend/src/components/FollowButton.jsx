@@ -14,6 +14,7 @@ const FollowButton = ({ userId, token }) => {
           },
         });
         const data = await res.json();
+        console.log("data", data);
         setIsFollowing(data.isFollowing);
       } catch (err) {
         console.error("Follow status error:", err);
@@ -30,7 +31,6 @@ const FollowButton = ({ userId, token }) => {
       const res = await fetch(`http://localhost:3000/api/v1/follow/${userId}`, {
         method,
         headers: {
-          "Content-Type": "application/json",
           Authorization: `Bearer ${token}`,
         },
       });
@@ -53,13 +53,19 @@ const FollowButton = ({ userId, token }) => {
     <button
       onClick={handleFollowToggle}
       disabled={loading}
-      className={`px-4 py-2 rounded-md text-white font-medium transition-all ${
+      className={`px-6 py-2.5 rounded-full font-semibold text-white shadow-md transform transition-all duration-300 ${
         isFollowing
-          ? "bg-red-500 hover:bg-red-600"
-          : "bg-blue-500 hover:bg-blue-600"
-      }`}
+          ? "bg-gradient-to-r from-red-400 to-red-600 hover:scale-105 hover:shadow-lg"
+          : "bg-gradient-to-r from-blue-400 to-purple-500 hover:scale-105 hover:shadow-lg"
+      } ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
     >
-      {loading ? "..." : isFollowing ? "Unfollow" : "Follow"}
+      {loading ? (
+        <span className="animate-pulse">Loading...</span>
+      ) : isFollowing ? (
+        "Unfollow 💔"
+      ) : (
+        "Follow 💖"
+      )}
     </button>
   );
 };

@@ -1,9 +1,31 @@
 import React, { useState, useEffect } from "react";
 
-const LikeButton = ({ postId, initialLiked, initialCount }) => {
-  const [liked, setLiked] = useState(initialLiked);
-  const [likeCount, setLikeCount] = useState(initialCount || 0);
+const LikeButton = ({ postId }) => {
+  const [liked, setLiked] = useState(false);
+  const [likeCount, setLikeCount] = useState(0);
   const [loading, setLoading] = useState(false);
+
+  // Fetch initial like status
+  useEffect(() => {
+    const fetchLikeInfo = async () => {
+      try {
+        const token = localStorage.getItem("token");
+        const res = await fetch(`http://localhost:3000/api/v1/posts/${postId}/like`, {
+          headers: { Authorization: `Bearer ${token}` },
+        });
+        const data = await res.json();
+        console.log("data",data)
+        if (data.success) {
+          setLiked(data.liked);
+      setLikeCount(data.count);
+        }
+      } catch (err) {
+        console.error("Error fetching like info:", err);
+      }
+    };
+
+    fetchLikeInfo();
+  }, [postId]);
 
   const handleLike = async () => {
     if (loading) return;
@@ -11,17 +33,15 @@ const LikeButton = ({ postId, initialLiked, initialCount }) => {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/api/v1/post/${postId}/like`, {
+      const res = await fetch(`http://localhost:3000/api/v1/posts/${postId}/like`, {
         method: "POST",
-        headers: {
-          Authorization: `Bearer ${token}`,
-        },
+        headers: { Authorization: `Bearer ${token}` },
       });
 
       const data = await res.json();
       if (data.success) {
         setLiked(data.liked);
-        setLikeCount((prev) => prev + (data.liked ? 1 : -1));
+        setLikeCount(data.count);
       }
     } catch (err) {
       console.error("Error liking post:", err);
@@ -34,14 +54,11 @@ const LikeButton = ({ postId, initialLiked, initialCount }) => {
     <button
       onClick={handleLike}
       disabled={loading}
-      style={{
-        background: liked ? "red" : "gray",
-        color: "white",
-        padding: "5px 10px",
-        borderRadius: "5px",
-        cursor: "pointer",
-        border: "none",
-      }}
+      className={`flex items-center gap-1 px-3 py-1 rounded-xl text-white font-semibold transition-all ${
+        liked
+          ? "bg-pink-500 hover:bg-pink-600"
+          : "bg-gray-400 hover:bg-gray-500"
+      }`}
     >
       ❤️ {likeCount}
     </button>

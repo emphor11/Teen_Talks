@@ -67,32 +67,40 @@ export default function Signup() {
   };
 
   return (
-    <div className="max-w-md mx-auto mt-20 p-6 border rounded">
-      <h2 className="text-xl mb-4">Create an Account</h2>
-      <form onSubmit={handleSubmit} className="flex flex-col gap-3">
-        <input
-          value={name}
-          onChange={(e) => setName(e.target.value)}
-          placeholder="name"
-          className="border p-2"
-        />
-        <input
-          value={email}
-          onChange={(e) => setEmail(e.target.value)}
-          placeholder="email"
-          className="border p-2"
-        />
-        <input
-          value={password}
-          onChange={(e) => setPassword(e.target.value)}
-          placeholder="password"
-          type="password"
-          className="border p-2"
-        />
-        <button type="submit" className="bg-green-500 text-white p-2 rounded">
-          {loading ? "Signing up..." : "Signup"}
-        </button>
-      </form>
+    <div className="min-h-screen bg-gradient-to-b from-pink-100 via-purple-100 to-blue-100 flex items-center justify-center p-6">
+      <div className="bg-white shadow-xl rounded-2xl p-8 w-full max-w-md border border-gray-100">
+        <h2 className="text-2xl font-bold text-gray-800 mb-6 font-[Poppins] text-center">
+          Create an Account
+        </h2>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <input
+            value={name}
+            onChange={(e) => setName(e.target.value)}
+            placeholder="Name"
+            className="border border-gray-300 p-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-300 transition text-gray-700 font-[Poppins]"
+          />
+          <input
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Email"
+            className="border border-gray-300 p-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-300 transition text-gray-700 font-[Poppins]"
+          />
+          <input
+            value={password}
+            onChange={(e) => setPassword(e.target.value)}
+            placeholder="Password"
+            type="password"
+            className="border border-gray-300 p-3 rounded-2xl focus:outline-none focus:ring-2 focus:ring-pink-300 transition text-gray-700 font-[Poppins]"
+          />
+          <button
+            type="submit"
+            disabled={loading}
+            className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold px-5 py-3 rounded-2xl shadow-md hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
+          >
+            {loading ? "Signing up..." : "Signup"}
+          </button>
+        </form>
+      </div>
     </div>
   );
 }

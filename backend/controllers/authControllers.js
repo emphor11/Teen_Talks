@@ -1,7 +1,9 @@
 const { createUser, findUserByEmail, findUserById } = require("../models/User");
 
 const jwt = require("jsonwebtoken")
-const bcrypt = require("bcrypt")
+const bcrypt = require("bcrypt");
+const { getPostsByUserId } = require("../models/Post");
+
 
 function generateToken(userId) {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET);
@@ -62,11 +64,9 @@ const signin = async (req,res) =>{
     }
 
     const token = generateToken(user.id)
-    console.log("🟢 Email:", email);
-    console.log("🟢 Password:", password);
-    console.log("🟢 User found:", user);
-    console.log("🟢 Signed in successfully...");
-
+    const posts = await getPostsByUserId(user.id)
+    console.log("Post", posts)
+    console.log(user)
     return res.status(200).json({
         message: "Signed in successfully",
         token,
@@ -74,8 +74,10 @@ const signin = async (req,res) =>{
           id: user.id,
           name: user.name,
           email: user.email,
+          profile_pic: user.profile_pic
           // any other fields you want to expose
         },
+        posts,
       });
     }catch (err) {
     console.error("Signin error:", err);
