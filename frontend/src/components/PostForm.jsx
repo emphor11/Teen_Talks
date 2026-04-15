@@ -1,5 +1,6 @@
 // src/components/PostForm.jsx
 import React, { useState } from "react";
+import { apiUrl } from "../utils/config";
 
 const PostForm = ({ onPostCreated }) => {
   const [content, setContent] = useState("");
@@ -17,7 +18,7 @@ const PostForm = ({ onPostCreated }) => {
     try {
       setLoading(true);
       const token = localStorage.getItem("token");
-      const res = await fetch("http://localhost:3000/api/v1/posts", {
+      const res = await fetch(apiUrl("/posts"), {
         method: "POST",
         headers: {
           Authorization: `Bearer ${token}`,

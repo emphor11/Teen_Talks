@@ -2,16 +2,22 @@ const express = require("express");
 const http = require("http");
 const cors = require("cors")
 const { Server } = require("socket.io");
+const jwt = require("jsonwebtoken");
 const homeRoutes =require("./routes/home")
 const userRoutes = require("./routes/userRoutes")
 const postRoutes =  require("./routes/postRoutes")
 const followRoutes = require("./routes/followRoutes")
 const chatRoutes = require("./routes/chatRoutes");
 const path = require("path")
+require("dotenv").config();
+
 const app = express();
+const port = process.env.PORT || 3000;
+const allowedOrigin = process.env.FRONTEND_URL || "http://localhost:5173";
+
 app.use(express.json())
 app.use(cors({
-  origin: "http://localhost:5173", // frontend origin
+  origin: allowedOrigin,
   credentials: true // allow cookies/auth headers
 }));
 
@@ -25,7 +31,7 @@ app.use("/api/v1/chat", chatRoutes);
 // Create HTTP server and attach Socket.IO
 const server = http.createServer(app);
 const io = new Server(server, {
-  cors: { origin: "*" } // change this in production
+  cors: { origin: allowedOrigin, credentials: true }
 });
 
 
@@ -85,6 +91,6 @@ io.use((socket, next) => {
     });
   });
 
-app.listen(3000,()=>{
-    console.log("server started")
-})
+server.listen(port, () => {
+  console.log(`server started on port ${port}`);
+});

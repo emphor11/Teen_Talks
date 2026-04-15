@@ -7,11 +7,16 @@ import CommentSection from "../components/CommentSection";
 import { AuthContext } from "../context/AuthContext";
 
 const PostTest = () => {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
 
   const handlePostCreated = (newPost) => {
     setPosts([newPost, ...posts]); // add the new post to top
+  };
+
+  const handleLogout = () => {
+    logout();
+    window.location.replace("/login");
   };
 
   return (
@@ -36,6 +41,9 @@ const PostTest = () => {
             <Link to="/feed" className="btn-secondary">
               Feed
             </Link>
+            <button onClick={handleLogout} className="btn-ghost">
+              Logout
+            </button>
           </div>
         </div>
 

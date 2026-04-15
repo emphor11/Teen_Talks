@@ -6,9 +6,10 @@ import LikeButton from "../components/LikeButton";
 import FollowButton from "../components/FollowButton";
 import { resolveMediaUrl } from "../utils/media";
 import { AuthContext } from "../context/AuthContext";
+import { apiUrl } from "../utils/config";
 
 const FeedPage = () => {
-  const { user, posts: myPosts, setPosts: setMyPosts } = useContext(AuthContext);
+  const { user, logout, posts: myPosts, setPosts: setMyPosts } = useContext(AuthContext);
   const navigate = useNavigate();
   const [posts, setPosts] = useState([]);
   const [searchName, setSearchName] = useState("");
@@ -21,7 +22,7 @@ const FeedPage = () => {
     const fetchFeed = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch("http://localhost:3000/api/v1/posts/feed", {
+        const res = await fetch(apiUrl("/posts/feed"), {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -34,9 +35,9 @@ const FeedPage = () => {
     fetchFeed();
   }, []);
   const handleSearch = async () => {
-      try {
-        const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/api/v1/users/${searchName}`, {
+    try {
+      const token = localStorage.getItem("token");
+      const res = await fetch(apiUrl(`/users/${searchName}`), {
         headers: { Authorization: `Bearer ${token}` },
       });
       const data = await res.json();
@@ -59,7 +60,7 @@ const FeedPage = () => {
     try {
       setDeletingPostId(postId);
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/api/v1/posts/${postId}`, {
+      const res = await fetch(apiUrl(`/posts/${postId}`), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -87,6 +88,11 @@ const FeedPage = () => {
     }
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <div className="social-shell">
       <div className="page-frame">
@@ -112,6 +118,9 @@ const FeedPage = () => {
             <Link to="/post-test" className="btn-primary">
               New post
             </Link>
+            <button onClick={handleLogout} className="btn-ghost">
+              Logout
+            </button>
           </div>
         </div>
 

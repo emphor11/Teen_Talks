@@ -1,5 +1,5 @@
 import React, { useContext, useEffect, useMemo, useState } from "react";
-import { Link, useLocation } from "react-router-dom";
+import { Link, useLocation, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import API from "../services/api";
 
@@ -14,8 +14,9 @@ function getOtherParticipant(conversation, currentUserId) {
 }
 
 export default function ChatPage() {
-  const { user } = useContext(AuthContext);
+  const { user, logout } = useContext(AuthContext);
   const location = useLocation();
+  const navigate = useNavigate();
   const recipientFromState = location.state?.recipient ?? null;
 
   const [conversations, setConversations] = useState([]);
@@ -192,6 +193,11 @@ export default function ChatPage() {
     setMessages([]);
   };
 
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
+
   return (
     <div className="social-shell">
       <div className="page-frame">
@@ -217,6 +223,9 @@ export default function ChatPage() {
             <Link to={`/profile/${user?.id ?? ""}`} className="btn-primary">
               Profile
             </Link>
+            <button onClick={handleLogout} className="btn-ghost">
+              Logout
+            </button>
           </div>
         </div>
 

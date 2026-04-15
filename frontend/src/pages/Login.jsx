@@ -2,6 +2,8 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { apiUrl } from "../utils/config";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 export default function Login() {
   const [email, setEmail] = useState("");
@@ -10,13 +12,38 @@ export default function Login() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const completeLogin = async (data) => {
+    if (!data.user || !data.token) {
+      alert("Server returned invalid auth data");
+      return;
+    }
+
+    login(data.user, data.token, data.posts);
+
+    try {
+      const profileRes = await fetch(apiUrl("/profile"), {
+        headers: { Authorization: `Bearer ${data.token}` },
+      });
+      const profileData = await profileRes.json();
+
+      if (profileRes.ok && profileData.user) {
+        navigate(`/profile/${profileData.user.id}`);
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Profile fetch error:", err);
+      navigate("/");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/v1/signin", {
+      const res = await fetch(apiUrl("/signin"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ email, password }),
@@ -30,32 +57,34 @@ export default function Login() {
         return;
       }
 
-      if (!data.user || !data.token) {
-        console.error("Missing user or token in backend response", data);
-        alert("Server returned invalid auth data");
-        setLoading(false);
+      await completeLogin(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleCredential = async (response) => {
+    if (!response?.credential || loading) return;
+
+    try {
+      setLoading(true);
+      const res = await fetch(apiUrl("/google"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Google sign-in failed");
         return;
       }
 
-      login(data.user, data.token,data.posts);
-
-      try {
-        const profileRes = await fetch("http://localhost:3000/api/v1/profile", {
-          headers: { Authorization: `Bearer ${data.token}` },
-        });
-        const profileData = await profileRes.json();
-
-        if (profileRes.ok && profileData.user) {
-          console.log("Profile fetched successfully:", profileData.user);
-          navigate(`/profile/${profileData.user.id}`);
-        } else {
-          console.error("Error fetching profile:", profileData);
-          navigate("/");
-        }
-      } catch (err) {
-        console.error("Profile fetch error:", err);
-        navigate("/");
-      }
+      await completeLogin(data);
+    } catch (error) {
+      console.error("Google login error:", error);
+      alert("Google sign-in failed");
     } finally {
       setLoading(false);
     }
@@ -135,6 +164,15 @@ export default function Login() {
                 {loading ? "Logging in..." : "Login"}
               </button>
             </form>
+
+            <div className="auth-divider">
+              <span>or continue with</span>
+            </div>
+
+            <GoogleSignInButton
+              onCredential={handleGoogleCredential}
+              disabled={loading}
+            />
 
             <p className="mt-6 text-center text-sm text-slate-500">
               Don’t have an account?{" "}

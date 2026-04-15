@@ -1,13 +1,38 @@
-const { createUser, findUserByEmail, findUserById } = require("../models/User");
+const {
+    createUser,
+    createGoogleUser,
+    findUserByEmail,
+    findUserById,
+    findUserByGoogleId,
+    linkGoogleAccount,
+} = require("../models/User");
 
 const jwt = require("jsonwebtoken")
 const bcrypt = require("bcrypt");
 const { getPostsByUserId } = require("../models/Post");
+const { OAuth2Client } = require("google-auth-library");
 
+const googleClient = new OAuth2Client(process.env.GOOGLE_CLIENT_ID);
 
 function generateToken(userId) {
     return jwt.sign({ id: userId }, process.env.JWT_SECRET);
-  }
+}
+
+async function buildAuthResponse(user) {
+    const token = generateToken(user.id);
+    const posts = await getPostsByUserId(user.id);
+
+    return {
+        token,
+        user: {
+            id: user.id,
+            name: user.name,
+            email: user.email,
+            profile_pic: user.profile_pic ?? null,
+        },
+        posts,
+    };
+}
 
 const signup = async (req, res) =>{
     try{
@@ -27,16 +52,9 @@ const signup = async (req, res) =>{
     // save new user
         const newUser = await createUser(name, email, hashedPassword);
 
-        const token = generateToken(newUser.id);
+        const authResponse = await buildAuthResponse(newUser);
 
-        res.status(201).json({
-        token,
-        user: {
-            id: newUser.id,
-            name: newUser.name,
-            email: newUser.email,
-        },
-        });
+        res.status(201).json(authResponse);
 
 
     } catch (err) {
@@ -58,31 +76,80 @@ const signin = async (req,res) =>{
     if(!user){
         return res.status(400).json({message: "Invalid Credentials"})
     }
+    if (!user.password) {
+        return res.status(400).json({ message: "Use Google sign-in for this account" });
+    }
     const isMatch =await bcrypt.compare(password,user.password)
     if (!isMatch){
         return res.status(400).json({ message: "Invalid credentials" });
     }
 
-    const token = generateToken(user.id)
-    const posts = await getPostsByUserId(user.id)
-    console.log("Post", posts)
+    const authResponse = await buildAuthResponse(user)
     console.log(user)
     return res.status(200).json({
         message: "Signed in successfully",
-        token,
-        user: {
-          id: user.id,
-          name: user.name,
-          email: user.email,
-          profile_pic: user.profile_pic
-          // any other fields you want to expose
-        },
-        posts,
+        ...authResponse,
       });
     }catch (err) {
     console.error("Signin error:", err);
     res.status(500).json({ message: "Server error" });
 }
+}
+
+const googleSignin = async (req, res) => {
+    try {
+        const { credential } = req.body;
+
+        if (!credential) {
+            return res.status(400).json({ message: "Google credential required" });
+        }
+
+        if (!process.env.GOOGLE_CLIENT_ID) {
+            return res.status(500).json({ message: "Google auth is not configured" });
+        }
+
+        const ticket = await googleClient.verifyIdToken({
+            idToken: credential,
+            audience: process.env.GOOGLE_CLIENT_ID,
+        });
+
+        const payload = ticket.getPayload();
+
+        if (!payload?.email || !payload?.sub || payload.email_verified === false) {
+            return res.status(400).json({ message: "Invalid Google account" });
+        }
+
+        let user = await findUserByGoogleId(payload.sub);
+
+        if (!user) {
+            const existingUser = await findUserByEmail(payload.email);
+
+            if (existingUser) {
+                user = await linkGoogleAccount(
+                    existingUser.id,
+                    payload.sub,
+                    payload.picture || null
+                );
+            } else {
+                user = await createGoogleUser(
+                    payload.name || payload.email.split("@")[0],
+                    payload.email,
+                    payload.sub,
+                    payload.picture || null
+                );
+            }
+        }
+
+        const authResponse = await buildAuthResponse(user);
+
+        return res.status(200).json({
+            message: "Google sign-in successful",
+            ...authResponse,
+        });
+    } catch (err) {
+        console.error("Google signin error:", err);
+        return res.status(500).json({ message: "Google sign-in failed" });
+    }
 }
 
 const profile = async (req,res) => {
@@ -103,5 +170,4 @@ const profile = async (req,res) => {
 }
 
 
-
-module.exports ={signup,signin,profile}
+module.exports ={signup,signin,googleSignin,profile}

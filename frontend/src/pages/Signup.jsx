@@ -2,6 +2,8 @@
 import React, { useState, useContext } from "react";
 import { useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
+import { apiUrl } from "../utils/config";
+import GoogleSignInButton from "../components/GoogleSignInButton";
 
 export default function Signup() {
   const [name, setName] = useState("");
@@ -11,13 +13,39 @@ export default function Signup() {
   const navigate = useNavigate();
   const [loading, setLoading] = useState(false);
 
+  const completeLogin = async (data) => {
+    if (!data.user || !data.token) {
+      alert("Invalid signup response from server");
+      return;
+    }
+
+    login(data.user, data.token, data.posts);
+
+    try {
+      const profileRes = await fetch(apiUrl("/profile"), {
+        headers: { Authorization: `Bearer ${data.token}` },
+      });
+
+      const profileData = await profileRes.json();
+
+      if (profileRes.ok && profileData.user) {
+        navigate(`/profile/${profileData.user.id}`);
+      } else {
+        navigate("/");
+      }
+    } catch (err) {
+      console.error("Profile fetch error:", err);
+      navigate("/");
+    }
+  };
+
   const handleSubmit = async (e) => {
     e.preventDefault();
     if (loading) return;
     setLoading(true);
 
     try {
-      const res = await fetch("http://localhost:3000/api/v1/signup", {
+      const res = await fetch(apiUrl("/signup"), {
         method: "POST",
         headers: { "Content-Type": "application/json" },
         body: JSON.stringify({ name, email, password }),
@@ -33,34 +61,37 @@ export default function Signup() {
       }
 
       // ✅ Log the user in immediately after signup
-      if (data.user && data.token) {
-        login(data.user, data.token);
-
-        // ✅ Fetch profile & redirect
-        try {
-          const profileRes = await fetch("http://localhost:3000/api/v1/profile", {
-            headers: { Authorization: `Bearer ${data.token}` },
-          });
-
-          const profileData = await profileRes.json();
-
-          if (profileRes.ok && profileData.user) {
-            console.log("Profile fetched:", profileData.user);
-            navigate(`/profile/${profileData.user.id}`);
-          } else {
-            console.error("Profile fetch failed:", profileData);
-            navigate("/");
-          }
-        } catch (err) {
-          console.error("Profile fetch error:", err);
-          navigate("/");
-        }
-      } else {
-        alert("Invalid signup response from server");
-      }
+      await completeLogin(data);
     } catch (err) {
       console.error("Signup error:", err);
       alert("Network error");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleGoogleCredential = async (response) => {
+    if (!response?.credential || loading) return;
+
+    try {
+      setLoading(true);
+      const res = await fetch(apiUrl("/google"), {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ credential: response.credential }),
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Google sign-in failed");
+        return;
+      }
+
+      await completeLogin(data);
+    } catch (error) {
+      console.error("Google signup error:", error);
+      alert("Google sign-in failed");
     } finally {
       setLoading(false);
     }
@@ -119,6 +150,15 @@ export default function Signup() {
                 {loading ? "Signing up..." : "Create account"}
               </button>
             </form>
+
+            <div className="auth-divider">
+              <span>or continue with</span>
+            </div>
+
+            <GoogleSignInButton
+              onCredential={handleGoogleCredential}
+              disabled={loading}
+            />
 
             <p className="mt-6 text-center text-sm text-slate-500">
               Already have an account?{" "}

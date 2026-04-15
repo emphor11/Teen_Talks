@@ -4,11 +4,12 @@ import { AuthContext } from "../context/AuthContext";
 import CommentSection from "../components/CommentSection";
 import ProfilePictureUpload from "../components/ProfilePicture";
 import { resolveMediaUrl } from "../utils/media";
+import { apiUrl } from "../utils/config";
 
 
 
 const ProfilePage = () => {
-  const { user, posts, setPosts } = useContext(AuthContext);
+  const { user, logout, posts, setPosts } = useContext(AuthContext);
   // const [searchId, setSearchId] = useState("");
   // const [searchedUser, setSearchedUser] = useState(null);
   const [expandedPost, setExpandedPost] = useState(null);
@@ -17,6 +18,10 @@ const ProfilePage = () => {
   const navigate = useNavigate();
 
   const navPost = () => navigate("/post-test");
+  const handleLogout = () => {
+    logout();
+    navigate("/login", { replace: true });
+  };
 
   // This now only handles toggling open/closed
   const toggleComments = (postId) => {
@@ -30,7 +35,7 @@ const ProfilePage = () => {
     try {
       setDeletingPostId(postId);
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/api/v1/posts/${postId}`, {
+      const res = await fetch(apiUrl(`/posts/${postId}`), {
         method: "DELETE",
         headers: { Authorization: `Bearer ${token}` },
       });
@@ -89,6 +94,9 @@ const ProfilePage = () => {
             </button>
             <button onClick={() => navigate("/feed")} className="btn-secondary">
               Open feed
+            </button>
+            <button onClick={handleLogout} className="btn-ghost">
+              Logout
             </button>
           </div>
         </div>

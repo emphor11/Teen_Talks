@@ -26,10 +26,31 @@ function App() {
       />
       <Route path="/login" element={<Login />} />
       <Route path="/signup" element={<Signup/>}/>
-      <Route path="/post-test" element={<PostTest/>}/>
+      <Route
+        path="/post-test"
+        element={
+          <PrivateRoute>
+            <PostTest />
+          </PrivateRoute>
+        }
+      />
       <Route path="/follow-test" element={<FollowTest/>}/>
-      <Route path="/profile/:userId" element={<ProfilePage/>}/>
-      <Route path="/feed" element={<FeedPage />} />
+      <Route
+        path="/profile/:userId"
+        element={
+          <PrivateRoute>
+            <ProfilePage />
+          </PrivateRoute>
+        }
+      />
+      <Route
+        path="/feed"
+        element={
+          <PrivateRoute>
+            <FeedPage />
+          </PrivateRoute>
+        }
+      />
       <Route
         path="/chat"
         element={

@@ -1,6 +1,7 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
 import { resolveMediaUrl } from "../utils/media";
+import { apiUrl } from "../utils/config";
 
 const ProfilePictureUpload = () => {
   const { user, setUser } = useContext(AuthContext);
@@ -18,7 +19,7 @@ const ProfilePictureUpload = () => {
 
   try {
     const token = localStorage.getItem("token");
-    const res = await fetch("http://localhost:3000/api/v1/users/profile-pic", {
+    const res = await fetch(apiUrl("/users/profile-pic"), {
       method: "POST",
       headers: { Authorization: `Bearer ${token}` },
       body: formData,

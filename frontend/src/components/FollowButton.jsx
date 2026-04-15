@@ -1,4 +1,5 @@
 import React, { useEffect, useState } from "react";
+import { apiUrl } from "../utils/config";
 
 const FollowButton = ({ userId, token }) => {
   const [isFollowing, setIsFollowing] = useState(false);
@@ -8,7 +9,7 @@ const FollowButton = ({ userId, token }) => {
   useEffect(() => {
     const fetchStatus = async () => {
       try {
-        const res = await fetch(`http://localhost:3000/api/v1/follow/${userId}`, {
+        const res = await fetch(apiUrl(`/follow/${userId}`), {
           headers: {
             Authorization: `Bearer ${token}`,
           },
@@ -28,7 +29,7 @@ const FollowButton = ({ userId, token }) => {
     setLoading(true);
     try {
       const method = isFollowing ? "DELETE" : "POST";
-      const res = await fetch(`http://localhost:3000/api/v1/follow/${userId}`, {
+      const res = await fetch(apiUrl(`/follow/${userId}`), {
         method,
         headers: {
           Authorization: `Bearer ${token}`,

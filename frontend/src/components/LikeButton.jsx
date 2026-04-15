@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { apiUrl } from "../utils/config";
 
 const LikeButton = ({ postId }) => {
   const [liked, setLiked] = useState(false);
@@ -10,7 +11,7 @@ const LikeButton = ({ postId }) => {
     const fetchLikeInfo = async () => {
       try {
         const token = localStorage.getItem("token");
-        const res = await fetch(`http://localhost:3000/api/v1/posts/${postId}/like`, {
+        const res = await fetch(apiUrl(`/posts/${postId}/like`), {
           headers: { Authorization: `Bearer ${token}` },
         });
         const data = await res.json();
@@ -33,7 +34,7 @@ const LikeButton = ({ postId }) => {
 
     try {
       const token = localStorage.getItem("token");
-      const res = await fetch(`http://localhost:3000/api/v1/posts/${postId}/like`, {
+      const res = await fetch(apiUrl(`/posts/${postId}/like`), {
         method: "POST",
         headers: { Authorization: `Bearer ${token}` },
       });

@@ -1,4 +1,5 @@
 import React, { useState, useEffect } from "react";
+import { apiUrl } from "../utils/config";
 
 const CommentSection = ({ postId }) => {
   const [comments, setComments] = useState([]);
@@ -8,7 +9,7 @@ const CommentSection = ({ postId }) => {
   // Fetch comments for this post
   const fetchComments = async () => {
     try {
-      const res = await fetch(`http://localhost:3000/api/v1/posts/comments/${postId}`);
+      const res = await fetch(apiUrl(`/posts/comments/${postId}`));
       const data = await res.json();
       console.log("Fetched comments:", data);
       setComments(data || []); // ✅ Corrected
@@ -26,7 +27,7 @@ const CommentSection = ({ postId }) => {
       setLoading(true);
       const token = localStorage.getItem("token");
 
-      const res = await fetch(`http://localhost:3000/api/v1/posts/comments/${postId}`, {
+      const res = await fetch(apiUrl(`/posts/comments/${postId}`), {
         method: "POST",
         headers: {
           "Content-Type": "application/json",
