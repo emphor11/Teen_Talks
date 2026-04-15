@@ -62,45 +62,92 @@ export default function Login() {
   };
 
   return (
-    <div className="min-h-screen flex flex-col items-center justify-center bg-gradient-to-b from-pink-100 via-purple-100 to-blue-100">
-      <div className="w-full max-w-sm bg-white shadow-xl rounded-2xl p-8 border border-gray-100">
-        <h2 className="text-3xl font-bold text-center text-gray-800 mb-6 font-[Poppins]">
-          Welcome Back 👋
-        </h2>
-        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
-          <input
-            type="email"
-            placeholder="Email address"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            className="border border-gray-300 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 p-3 rounded-xl outline-none transition-all duration-300"
-          />
-          <input
-            type="password"
-            placeholder="Password"
-            value={password}
-            onChange={(e) => setPassword(e.target.value)}
-            className="border border-gray-300 focus:border-pink-400 focus:ring-2 focus:ring-pink-200 p-3 rounded-xl outline-none transition-all duration-300"
-          />
-          <button
-            type="submit"
-            disabled={loading}
-            className={`${
-              loading ? "opacity-70" : "hover:opacity-90"
-            } bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold rounded-xl p-3 transition-all duration-300 shadow-md`}
-          >
-            {loading ? "Logging in..." : "Login"}
-          </button>
-        </form>
-        <p className="text-center text-gray-500 mt-6 text-sm">
-          Don’t have an account?{" "}
-          <span
-            onClick={() => navigate("/signup")}
-            className="text-pink-500 font-semibold hover:underline cursor-pointer"
-          >
-            Sign up
-          </span>
-        </p>
+    <div className="auth-shell">
+      <div className="page-frame flex min-h-screen items-center">
+        <div className="hero-grid w-full">
+          <section className="fade-up">
+            <span className="eyebrow">Teen Talks</span>
+            <h1 className="headline mt-5 text-5xl font-extrabold leading-[1.02] text-slate-900 md:text-6xl">
+              Log in to your social space.
+            </h1>
+            <p className="mt-5 max-w-xl text-lg leading-8 text-slate-600">
+              Jump back into your feed, keep up with friends, and share what
+              matters in a cleaner, more modern experience.
+            </p>
+            <div className="mt-8 grid gap-4 sm:grid-cols-2">
+              <div className="floating-note">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
+                  Daily Flow
+                </p>
+                <p className="mt-2 text-sm text-slate-600">
+                  Check your profile, create posts, and move through the feed
+                  with a more polished layout.
+                </p>
+              </div>
+              <div className="floating-note">
+                <p className="text-sm font-bold uppercase tracking-[0.18em] text-sky-500">
+                  Fresh UI
+                </p>
+                <p className="mt-2 text-sm text-slate-600">
+                  Soft glass cards, warm accents, and stronger visual hierarchy.
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <section className="panel auth-card fade-up">
+            <div className="mb-7">
+              <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
+                Welcome Back
+              </p>
+              <h2 className="headline mt-3 text-3xl font-extrabold text-slate-900">
+                Sign in
+              </h2>
+              <p className="mt-2 text-sm text-slate-500">
+                Use your email and password to continue.
+              </p>
+            </div>
+
+            <form onSubmit={handleSubmit} className="space-y-4">
+              <div>
+                <label className="field-label">Email address</label>
+                <input
+                  type="email"
+                  placeholder="you@example.com"
+                  value={email}
+                  onChange={(e) => setEmail(e.target.value)}
+                  className="text-input"
+                />
+              </div>
+
+              <div>
+                <label className="field-label">Password</label>
+                <input
+                  type="password"
+                  placeholder="Enter your password"
+                  value={password}
+                  onChange={(e) => setPassword(e.target.value)}
+                  className="text-input"
+                />
+              </div>
+
+              <button type="submit" disabled={loading} className="btn-primary w-full">
+                {loading ? "Logging in..." : "Login"}
+              </button>
+            </form>
+
+            <p className="mt-6 text-center text-sm text-slate-500">
+              Don’t have an account?{" "}
+              <button
+                type="button"
+                onClick={() => navigate("/signup")}
+                className="font-bold text-orange-500"
+              >
+                Sign up
+              </button>
+            </p>
+          </section>
+        </div>
       </div>
     </div>
   );

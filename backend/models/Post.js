@@ -19,6 +19,7 @@ const getAllPosts = async () => {
   p.content,
   p.media_url,
   p.created_at,
+  u.name AS author,
 
   -- like count
   COALESCE(like_count.count, 0) AS likes_count,
@@ -37,6 +38,7 @@ const getAllPosts = async () => {
   ) AS comments
 
 FROM posts p
+JOIN users u ON u.id = p.user_id
 
 -- likes subquery
 LEFT JOIN (
@@ -49,7 +51,7 @@ LEFT JOIN (
 LEFT JOIN comments c ON c.post_id = p.id
 LEFT JOIN users cu ON c.user_id = cu.id
 
-GROUP BY p.id, like_count.count
+GROUP BY p.id, u.name, like_count.count
 ORDER BY p.created_at DESC;
 
     `
@@ -78,5 +80,40 @@ const getPostsByUserId = async (userId) => {
   return result.rows;
 };
 
+const deletePostById = async (postId, userId) => {
+  const client = await pool.connect();
 
-module.exports = { createPost, getAllPosts, getPostById ,getPostsByUserId}
+  try {
+    await client.query("BEGIN");
+
+    const existingPost = await client.query(
+      "SELECT * FROM posts WHERE id = $1 AND user_id = $2",
+      [postId, userId]
+    );
+
+    if (existingPost.rows.length === 0) {
+      await client.query("ROLLBACK");
+      return null;
+    }
+
+    await client.query("DELETE FROM comments WHERE post_id = $1", [postId]);
+    await client.query("DELETE FROM likes WHERE post_id = $1", [postId]);
+
+    const result = await client.query(
+      `DELETE FROM posts
+       WHERE id = $1 AND user_id = $2
+       RETURNING *`,
+      [postId, userId]
+    );
+
+    await client.query("COMMIT");
+    return result.rows[0];
+  } catch (error) {
+    await client.query("ROLLBACK");
+    throw error;
+  } finally {
+    client.release();
+  }
+};
+
+module.exports = { createPost, getAllPosts, getPostById ,getPostsByUserId, deletePostById }

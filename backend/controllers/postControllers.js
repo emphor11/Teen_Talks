@@ -1,4 +1,4 @@
-const { createPost, getAllPosts, getPostById, getPostsByUserId, } = require("../models/Post");
+const { createPost, getAllPosts, getPostById, getPostsByUserId, deletePostById } = require("../models/Post");
 const path = require("path");
 
 const addPost = async (req, res) => {
@@ -57,5 +57,20 @@ const getMyPost = async (req,res) =>{
     res.status(500).json({ message: "Server error" });
   }
 }
+
+const removePost = async (req, res) => {
+  try {
+    const deletedPost = await deletePostById(req.params.postId, req.userId);
+
+    if (!deletedPost) {
+      return res.status(404).json({ message: "Post not found or not owned by user" });
+    }
+
+    return res.json({ success: true, post: deletedPost });
+  } catch (err) {
+    console.error("Delete Post Error:", err);
+    return res.status(500).json({ message: "Server error" });
+  }
+};
   
-module.exports = { addPost, getPost, fetchPostById ,getMyPost};
+module.exports = { addPost, getPost, fetchPostById ,getMyPost, removePost };

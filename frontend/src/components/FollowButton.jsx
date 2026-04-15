@@ -53,18 +53,18 @@ const FollowButton = ({ userId, token }) => {
     <button
       onClick={handleFollowToggle}
       disabled={loading}
-      className={`px-6 py-2.5 rounded-full font-semibold text-white shadow-md transform transition-all duration-300 ${
+      className={`w-full ${
         isFollowing
-          ? "bg-gradient-to-r from-red-400 to-red-600 hover:scale-105 hover:shadow-lg"
-          : "bg-gradient-to-r from-blue-400 to-purple-500 hover:scale-105 hover:shadow-lg"
-      } ${loading ? "opacity-70 cursor-not-allowed" : ""}`}
+          ? "btn-ghost !border-rose-200 !bg-rose-50 !text-rose-600"
+          : "btn-secondary"
+      }`}
     >
       {loading ? (
         <span className="animate-pulse">Loading...</span>
       ) : isFollowing ? (
-        "Unfollow 💔"
+        "Following"
       ) : (
-        "Follow 💖"
+        "Follow"
       )}
     </button>
   );

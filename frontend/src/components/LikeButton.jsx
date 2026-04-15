@@ -54,13 +54,14 @@ const LikeButton = ({ postId }) => {
     <button
       onClick={handleLike}
       disabled={loading}
-      className={`flex items-center gap-1 px-3 py-1 rounded-xl text-white font-semibold transition-all ${
+      className={`chip-button ${
         liked
-          ? "bg-pink-500 hover:bg-pink-600"
-          : "bg-gray-400 hover:bg-gray-500"
+          ? "!border-orange-200 !bg-orange-50 !text-orange-600"
+          : "!bg-white/80 !text-slate-700"
       }`}
     >
-      ❤️ {likeCount}
+      <span aria-hidden="true">{liked ? "❤️" : "🤍"}</span>
+      {likeCount}
     </button>
   );
 };

@@ -8,6 +8,7 @@ import PostTest from "./pages/PostTest";
 import FollowTest from "./pages/FollowTest";
 import ProfilePage from "./pages/ProfilePage";
 import FeedPage from "./pages/FeedPage";
+import ChatPage from "./pages/ChatPage";
 
 
 function App() {
@@ -29,6 +30,14 @@ function App() {
       <Route path="/follow-test" element={<FollowTest/>}/>
       <Route path="/profile/:userId" element={<ProfilePage/>}/>
       <Route path="/feed" element={<FeedPage />} />
+      <Route
+        path="/chat"
+        element={
+          <PrivateRoute>
+            <ChatPage />
+          </PrivateRoute>
+        }
+      />
     </Routes>
   )
 }

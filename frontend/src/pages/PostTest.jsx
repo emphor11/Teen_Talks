@@ -1,10 +1,13 @@
 // src/pages/PostTest.jsx
-import React, { useState } from "react";
+import React, { useContext, useState } from "react";
+import { Link } from "react-router-dom";
 import PostForm from "../components/PostForm";
 // import LikeButton from "../components/LikeButton";
 import CommentSection from "../components/CommentSection";
+import { AuthContext } from "../context/AuthContext";
 
 const PostTest = () => {
+  const { user } = useContext(AuthContext);
   const [posts, setPosts] = useState([]);
 
   const handlePostCreated = (newPost) => {
@@ -12,43 +15,80 @@ const PostTest = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-100 via-purple-100 to-blue-100 p-6 flex flex-col items-center">
-      <h1 className="text-3xl font-bold text-gray-800 mb-6 font-[Poppins]">
-        Test Post Creation
-      </h1>
-
-      <PostForm onPostCreated={handlePostCreated} />
-
-      <div className="w-full max-w-md flex flex-col gap-6 mt-6">
-        {posts.map((post) => (
-          <div
-            key={post.id}
-            className="bg-white shadow-xl rounded-2xl p-4 border border-gray-100 flex flex-col gap-3"
-          >
-            <p className="text-gray-700 font-[Poppins]">{post.content}</p>
-
-            {post.media_url && post.media_url.endsWith(".mp4") ? (
-              <video
-                className="rounded-2xl border border-gray-200"
-                width="100%"
-                controls
-              >
-                <source src={post.media_url} type="video/mp4" />
-              </video>
-            ) : (
-              post.media_url && (
-                <img
-                  className="rounded-2xl border border-gray-200"
-                  src={post.media_url}
-                  alt="post media"
-                />
-              )
-            )}
-
-            <CommentSection postId={post.id} />
-            {/* <LikeButton postId={post.id} initialLiked={post.likes} /> */}
+    <div className="social-shell">
+      <div className="page-frame">
+        <div className="panel topbar">
+          <div className="brand-mark">
+            <div className="brand-badge">TT</div>
+            <div>
+              <p className="headline text-lg font-extrabold text-slate-900">
+                Post Studio
+              </p>
+              <p className="text-sm text-slate-500">
+                Compose and preview posts with the same existing submission flow.
+              </p>
+            </div>
           </div>
-        ))}
+          <div className="topbar-actions">
+            <Link to={`/profile/${user?.id ?? ""}`} className="btn-ghost">
+              Profile
+            </Link>
+            <Link to="/feed" className="btn-secondary">
+              Feed
+            </Link>
+          </div>
+        </div>
+
+        <div className="mx-auto max-w-4xl">
+          <main className="feed-stack">
+            <PostForm onPostCreated={handlePostCreated} />
+
+            <div className="section-title">
+              <div>
+                <span className="eyebrow">Preview</span>
+                <h2 className="headline mt-4 text-3xl font-extrabold text-slate-900">
+                  New posts in this session
+                </h2>
+              </div>
+            </div>
+
+            {posts.length === 0 ? (
+              <div className="post-card empty-state">
+                Your freshly created posts will appear here.
+              </div>
+            ) : (
+              posts.map((post) => (
+                <article key={post.id} className="post-card fade-up">
+                  <div className="post-card-body">
+                    {post.content && (
+                      <p className="text-[1.02rem] leading-8 text-slate-700">
+                        {post.content}
+                      </p>
+                    )}
+
+                    {post.media_url && post.media_url.endsWith(".mp4") ? (
+                      <video className="post-media mt-4" width="100%" controls>
+                        <source src={post.media_url} type="video/mp4" />
+                      </video>
+                    ) : (
+                      post.media_url && (
+                        <img
+                          className="post-media mt-4"
+                          src={post.media_url}
+                          alt="Post media"
+                        />
+                      )
+                    )}
+
+                    <div className="mt-5 rounded-[24px] border border-slate-200/70 bg-slate-50/80 p-4">
+                      <CommentSection postId={post.id} />
+                    </div>
+                  </div>
+                </article>
+              ))
+            )}
+          </main>
+        </div>
       </div>
     </div>
   );

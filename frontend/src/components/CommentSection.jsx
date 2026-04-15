@@ -1,8 +1,6 @@
-import React, { useState, useEffect, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
+import React, { useState, useEffect } from "react";
 
 const CommentSection = ({ postId }) => {
-  const { api } = useContext(AuthContext);
   const [comments, setComments] = useState([]);
   const [newComment, setNewComment] = useState("");
   const [loading, setLoading] = useState(false);
@@ -58,40 +56,33 @@ const CommentSection = ({ postId }) => {
   }, [postId]);
 
   return (
-    <div className="mt-4">
-      {/* Comment input */}
-      <form className="flex gap-2" onSubmit={handleSubmit}>
+    <div>
+      <form className="search-row" onSubmit={handleSubmit}>
         <input
           type="text"
           placeholder="Write a comment..."
           value={newComment}
           onChange={(e) => setNewComment(e.target.value)}
-          className="flex-1 p-3 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 text-gray-700 font-[Poppins] transition"
+          className="text-input"
         />
-        <button
-          type="submit"
-          disabled={loading}
-          className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold px-4 py-2 rounded-2xl shadow-md hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-        >
+        <button type="submit" disabled={loading} className="btn-primary">
           {loading ? "Posting..." : "Comment"}
         </button>
       </form>
 
-      {/* Comments list */}
-      <div className="mt-3 flex flex-col gap-3">
+      <div className="comment-stack">
         {comments.length === 0 ? (
-          <p className="text-gray-500 text-sm font-[Poppins]">No comments yet.</p>
+          <p className="text-sm text-slate-500">No comments yet.</p>
         ) : (
           comments.map((c) => (
-            <div
-              key={c.id}
-              className="bg-gradient-to-r from-pink-50 to-purple-50 p-3 rounded-2xl shadow-inner border border-gray-200 text-gray-700 font-[Poppins]"
-            >
-              <p className="font-semibold text-sm text-pink-600">{c.user_name}</p>
-              <p>{c.content}</p>
-              <p className="text-xs text-gray-400">
-                {new Date(c.created_at).toLocaleString()}
-              </p>
+            <div key={c.id} className="comment-card">
+              <div className="meta-row">
+                <p className="text-sm font-bold text-orange-500">{c.user_name}</p>
+                <p className="text-xs text-slate-400">
+                  {new Date(c.created_at).toLocaleString()}
+                </p>
+              </div>
+              <p className="mt-2 leading-7 text-slate-700">{c.content}</p>
             </div>
           ))
         )}

@@ -1,17 +1,18 @@
 import React, { useContext, useState } from "react";
-// import FollowButton from "../components/FollowButton";
-import { useNavigate } from "react-router-dom";
+import { Link, useNavigate } from "react-router-dom";
 import { AuthContext } from "../context/AuthContext";
 import CommentSection from "../components/CommentSection";
 import ProfilePictureUpload from "../components/ProfilePicture";
+import { resolveMediaUrl } from "../utils/media";
 
 
 
 const ProfilePage = () => {
-  const { user, posts } = useContext(AuthContext);
+  const { user, posts, setPosts } = useContext(AuthContext);
   // const [searchId, setSearchId] = useState("");
   // const [searchedUser, setSearchedUser] = useState(null);
   const [expandedPost, setExpandedPost] = useState(null);
+  const [deletingPostId, setDeletingPostId] = useState(null);
 
   const navigate = useNavigate();
 
@@ -22,95 +23,194 @@ const ProfilePage = () => {
     setExpandedPost(expandedPost === postId ? null : postId);
   };
 
+  const handleDeletePost = async (postId) => {
+    const confirmed = window.confirm("Delete this post?");
+    if (!confirmed) return;
+
+    try {
+      setDeletingPostId(postId);
+      const token = localStorage.getItem("token");
+      const res = await fetch(`http://localhost:3000/api/v1/posts/${postId}`, {
+        method: "DELETE",
+        headers: { Authorization: `Bearer ${token}` },
+      });
+
+      const data = await res.json();
+
+      if (!res.ok) {
+        alert(data.message || "Failed to delete post");
+        return;
+      }
+
+      const updatedPosts = posts.filter((post) => post.id !== postId);
+      setPosts(updatedPosts);
+      localStorage.setItem("posts", JSON.stringify(updatedPosts));
+      if (expandedPost === postId) setExpandedPost(null);
+    } catch (err) {
+      console.error("Delete post error:", err);
+      alert("Something went wrong");
+    } finally {
+      setDeletingPostId(null);
+    }
+  };
+
   if (!user)
     return (
-      <div className="flex justify-center items-center min-h-screen bg-gradient-to-b from-pink-100 via-purple-100 to-blue-100">
-        <p className="text-gray-600 text-lg animate-pulse">Loading profile...</p>
+      <div className="social-shell flex min-h-screen items-center justify-center">
+        <p className="text-lg text-slate-600 animate-pulse">Loading profile...</p>
       </div>
     );
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-pink-100 via-purple-100 to-blue-100 flex flex-col items-center p-6">
-      {/* Profile Card */}
-      <div className="bg-white shadow-xl rounded-2xl p-6 w-full max-w-md text-center border border-gray-100">
-        <h1 className="text-3xl font-bold text-gray-800 mb-1 font-[Poppins]">
-          Welcome, <span className="text-pink-500">{user.name}</span>
-        </h1>
-        <p className="text-gray-500 mb-6">{user.email}</p>
-        <ProfilePictureUpload />
-        
-      </div>
-
-      <button
-        onClick={navPost}
-        className="mt-6 bg-gradient-to-r from-pink-500 to-purple-500 text-white px-6 py-3 rounded-xl font-semibold shadow-md hover:scale-105 transition-all duration-300"
-      >
-        Create Post
-      </button>
-
-      {/* My Uploaded Posts */}
-      <div className="mt-10 w-full max-w-3xl">
-        <h2 className="text-2xl font-bold text-gray-700 mb-4">
-          My Uploaded Posts 📸
-        </h2>
-
-        {posts?.length > 0 ? (
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            {posts.map((post) => (
-              <div
-                key={post.id}
-                className="bg-white rounded-2xl shadow-md p-4 border border-gray-100"
-              >
-                {post.media_url && (
-                  <>
-                    {post.media_url.endsWith(".mp4") ? (
-                      <video
-                        src={`http://localhost:3000/api/v1${post.media_url}`}
-                        controls
-                        className="rounded-xl w-full h-60 object-cover"
-                      />
-                    ) : (
-                      <img
-                        src={`http://localhost:3000/api/v1${post.media_url}`}
-                        alt=""
-                        className="rounded-xl w-full h-60 object-cover"
-                      />
-                    )}
-                  </>
-                )}
-                <p className="text-gray-700 mt-2">{post.content}</p>
-
-                {/* Comments Dropdown */}
-                <button
-                  onClick={() => toggleComments(post.id)}
-                  className="mt-3 text-sm text-pink-600 font-semibold hover:underline"
-                >
-                  {expandedPost === post.id
-                    ? "Hide Comments ▲"
-                    : "Show Comments ▼"}
-                </button>
-
-                {expandedPost === post.id && (
-                  <div className="mt-3">
-                    <CommentSection postId={post.id} />
-                  </div>
-                )}
-              </div>
-            ))}
+    <div className="social-shell">
+      <div className="page-frame">
+        <div className="panel topbar">
+          <div className="brand-mark">
+            <div className="brand-badge">TT</div>
+            <div>
+              <p className="headline text-lg font-extrabold text-slate-900">
+                Profile
+              </p>
+              <p className="text-sm text-slate-500">
+                Manage your identity and review what you’ve posted.
+              </p>
+            </div>
           </div>
-        ) : (
-          <p className="text-gray-500 text-center mt-4">
-            You haven't uploaded any posts yet.
-          </p>
-        )}
-      </div>
 
-      <button
-        onClick={() => navigate("/feed")}
-        className="bg-blue-500 text-white px-4 py-2 rounded-xl shadow-md mt-6"
-      >
-        Go to Feed
-      </button>
+          <div className="topbar-actions">
+            <Link to="/" className="btn-ghost">
+              Home
+            </Link>
+            <Link to="/chat" className="btn-ghost">
+              Chat
+            </Link>
+            <button onClick={navPost} className="btn-primary">
+              Create post
+            </button>
+            <button onClick={() => navigate("/feed")} className="btn-secondary">
+              Open feed
+            </button>
+          </div>
+        </div>
+
+        <div className="profile-header">
+          <section className="profile-card fade-up">
+            <div className="profile-cover" />
+            <div className="profile-content">
+              <div className="flex flex-wrap items-end justify-between gap-4">
+                <div>
+                  <span className="eyebrow">Your Space</span>
+                  <h1 className="headline mt-4 text-4xl font-extrabold text-slate-900">
+                    {user.name}
+                  </h1>
+                  <p className="mt-2 text-slate-500">{user.email}</p>
+                </div>
+                <div className="info-pill">Member ID #{user.id}</div>
+              </div>
+
+              <div className="mt-6 max-w-[10rem]">
+                <div className="stat-card">
+                  <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
+                    Posts
+                  </p>
+                  <p className="mt-2 text-2xl font-extrabold text-slate-900">
+                    {posts?.length || 0}
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <section className="sidebar-card fade-up">
+            <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
+              Profile Picture
+            </p>
+            <h2 className="headline mt-3 text-3xl font-extrabold text-slate-900">
+              Update your look
+            </h2>
+            <p className="mt-3 text-sm leading-7 text-slate-600">
+              Upload flow is unchanged. This panel only makes the interaction
+              feel more intentional and social.
+            </p>
+            <div className="mt-6">
+              <ProfilePictureUpload />
+            </div>
+          </section>
+        </div>
+
+        <section className="mt-10 fade-up">
+          <div className="section-title">
+            <div>
+              <span className="eyebrow">Gallery</span>
+              <h2 className="headline mt-4 text-4xl font-extrabold text-slate-900">
+                Your uploaded posts
+              </h2>
+            </div>
+            <div className="info-pill">{posts?.length || 0} items</div>
+          </div>
+
+          {posts?.length > 0 ? (
+            <div className="post-grid">
+              {posts.map((post) => (
+                <article key={post.id} className="post-card">
+                  <div className="post-card-body">
+                    {post.media_url && (
+                      <div className="mb-4">
+                        {post.media_url.endsWith(".mp4") ? (
+                          <video
+                            src={resolveMediaUrl(post.media_url)}
+                            controls
+                            className="post-media"
+                          />
+                        ) : (
+                          <img
+                            src={resolveMediaUrl(post.media_url)}
+                            alt="Uploaded media"
+                            className="post-media"
+                          />
+                        )}
+                      </div>
+                    )}
+
+                    {post.content && (
+                      <p className="text-[1.02rem] leading-8 text-slate-700">
+                        {post.content}
+                      </p>
+                    )}
+
+                    <div className="mt-4 interaction-row">
+                      <div className="info-pill">Post #{post.id}</div>
+                      <button
+                        onClick={() => toggleComments(post.id)}
+                        className="chip-button"
+                      >
+                        {expandedPost === post.id ? "Hide comments" : "Show comments"}
+                      </button>
+                      <button
+                        onClick={() => handleDeletePost(post.id)}
+                        disabled={deletingPostId === post.id}
+                        className="chip-button !border-rose-200 !bg-rose-50 !text-rose-600"
+                      >
+                        {deletingPostId === post.id ? "Deleting..." : "Delete post"}
+                      </button>
+                    </div>
+
+                    {expandedPost === post.id && (
+                      <div className="mt-5 rounded-[24px] border border-slate-200/70 bg-slate-50/80 p-4">
+                        <CommentSection postId={post.id} />
+                      </div>
+                    )}
+                  </div>
+                </article>
+              ))}
+            </div>
+          ) : (
+            <div className="post-card empty-state">
+              You haven't uploaded any posts yet.
+            </div>
+          )}
+        </section>
+      </div>
     </div>
   );
 };

@@ -29,5 +29,14 @@ const countLikes = async (postId) => {
     );
     return result.rows[0].like_count;
   };
+
+const hasUserLiked = async (userId, postId) => {
+  const result = await pool.query(
+    "SELECT 1 FROM likes WHERE user_id = $1 AND post_id = $2 LIMIT 1",
+    [userId, postId]
+  );
+
+  return result.rows.length > 0;
+};
   
-module.exports = { toggleLike, countLikes };
+module.exports = { toggleLike, countLikes, hasUserLiked };

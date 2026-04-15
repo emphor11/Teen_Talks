@@ -1,10 +1,7 @@
 // src/components/PostForm.jsx
-import React, { useState, useContext } from "react";
-import { AuthContext } from "../context/AuthContext";
-import { data } from "react-router-dom";
+import React, { useState } from "react";
 
 const PostForm = ({ onPostCreated }) => {
-  const { user, api, login } = useContext(AuthContext); // use api for requests
   const [content, setContent] = useState("");
   const [media, setMedia] = useState(null);
   const [loading, setLoading] = useState(false);
@@ -47,29 +44,43 @@ const PostForm = ({ onPostCreated }) => {
   };
 
   return (
-    <form
-      onSubmit={handleSubmit}
-      className="bg-white shadow-xl rounded-2xl p-6 w-full max-w-md mx-auto mb-6 border border-gray-100 flex flex-col gap-4"
-    >
+    <form onSubmit={handleSubmit} className="composer fade-up">
+      <div className="section-title">
+        <div>
+          <p className="text-sm font-bold uppercase tracking-[0.18em] text-orange-500">
+            Create
+          </p>
+          <h2 className="headline mt-2 text-3xl font-extrabold text-slate-900">
+            Share a new post
+          </h2>
+        </div>
+      </div>
+
       <textarea
         placeholder="What's on your mind?"
         value={content}
         onChange={(e) => setContent(e.target.value)}
-        className="w-full p-4 rounded-2xl border border-gray-300 focus:outline-none focus:ring-2 focus:ring-pink-300 resize-none transition h-32 text-gray-700 font-[Poppins]"
+        className="text-area"
       />
-      <input
-        type="file"
-        accept="image/*,video/*"
-        onChange={(e) => setMedia(e.target.files[0])}
-        className="border border-gray-300 rounded-xl p-2 focus:outline-none focus:ring-2 focus:ring-purple-300 transition cursor-pointer text-gray-600"
-      />
-      <button
-        type="submit"
-        disabled={loading}
-        className="bg-gradient-to-r from-pink-500 to-purple-500 text-white font-semibold px-5 py-3 rounded-2xl shadow-md hover:scale-105 transition-all duration-300 disabled:opacity-50 disabled:cursor-not-allowed"
-      >
-        {loading ? "Posting..." : "Post"}
-      </button>
+
+      <div className="mt-4">
+        <label className="field-label">Add image or video</label>
+        <input
+          type="file"
+          accept="image/*,video/*"
+          onChange={(e) => setMedia(e.target.files[0])}
+          className="file-input"
+        />
+      </div>
+
+      <div className="mt-5 flex flex-wrap items-center justify-between gap-3">
+        <div className="info-pill">
+          {media ? `Selected: ${media.name}` : "Attach media if you want"}
+        </div>
+        <button type="submit" disabled={loading} className="btn-primary">
+          {loading ? "Posting..." : "Post now"}
+        </button>
+      </div>
     </form>
   );
 };

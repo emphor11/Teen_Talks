@@ -1,4 +1,4 @@
-const { toggleLike, countLikes } = require("../models/Likes")
+const { toggleLike, countLikes, hasUserLiked } = require("../models/Likes")
 
 
 const handleLike = async (req,res) =>{
@@ -20,9 +20,15 @@ const handleLike = async (req,res) =>{
 
 const getLikes = async (req, res) => {
     try {
-      const postId = req.params.id;
+      const postId = req.params.postId;
+      const userId = req.userId;
       const likeCount = await countLikes(postId);
-      res.json({ postId, likeCount });
+      const liked = await hasUserLiked(userId, postId);
+      res.json({
+        success: true,
+        liked,
+        count: parseInt(likeCount, 10),
+      });
     } catch (err) {
       console.error("Get Likes Error:", err);
       res.status(500).json({ message: "Server error" });

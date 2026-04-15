@@ -1,5 +1,6 @@
 import React, { useContext, useState } from "react";
 import { AuthContext } from "../context/AuthContext";
+import { resolveMediaUrl } from "../utils/media";
 
 const ProfilePictureUpload = () => {
   const { user, setUser } = useContext(AuthContext);
@@ -46,28 +47,29 @@ const ProfilePictureUpload = () => {
   }
 };
   return (
-    <div className="flex flex-col items-center space-y-3 mt-6">
-      <img
-        src={
-          user?.profile_pic
-            ? `http://localhost:3000/api/v1${user.profile_pic}`
-            : "/default-avatar.png"
-        }
-        alt="Profile"
-        className="w-32 h-32 rounded-full object-cover border-4 border-pink-400 shadow-lg"
-      />
-      <input
-        type="file"
-        accept="image/*"
-        onChange={handleFileChange}
-        className="text-sm text-gray-600"
-      />
-      <button
-        onClick={handleUpload}
-        disabled={loading}
-        className="bg-gradient-to-r from-pink-500 to-purple-500 text-white px-4 py-2 rounded-xl shadow-md hover:scale-105 transition"
-      >
-        {loading ? "Uploading..." : "Upload Profile Picture"}
+    <div className="flex flex-col items-center gap-4">
+      <div className="avatar avatar-lg overflow-hidden !rounded-[1.8rem] !bg-slate-100">
+        <img
+          src={
+            user?.profile_pic
+              ? resolveMediaUrl(user.profile_pic)
+              : "/default-avatar.png"
+          }
+          alt="Profile"
+          className="h-full w-full object-cover"
+        />
+      </div>
+      <div className="w-full">
+        <label className="field-label">Choose a new image</label>
+        <input
+          type="file"
+          accept="image/*"
+          onChange={handleFileChange}
+          className="file-input"
+        />
+      </div>
+      <button onClick={handleUpload} disabled={loading} className="btn-primary w-full">
+        {loading ? "Uploading..." : "Upload profile picture"}
       </button>
     </div>
   );
